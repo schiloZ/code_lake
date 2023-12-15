@@ -1,0 +1,107 @@
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+const Client = () => {
+  const [client, setClient] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/auth/client")
+      .then((result) => {
+        if (result.data.Status) {
+          setClient(result.data.Result);
+        } else {
+          alert(result.data.Error);
+        }
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
+  const handleDelete = (id) => {
+    axios
+      .delete("http://localhost:3000/auth/delete_client/" + id)
+      .then((result) => {
+        if (result.data.Status) {
+          window.location.reload();
+        } else {
+          alert(result.data.Error);
+        }
+      });
+  };
+
+  return (
+    <div className="px-5 mt-3">
+      <div className="d-flex justify-content-center">
+        <h3>Client List</h3>
+      </div>
+      <Link to="/dashboard/add_client" className="btn btn-success">
+        Add Client
+      </Link>
+      <div className="mt-3">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Fullname</th>
+              <th>Date of Birth</th>
+              <th>Nationality</th>
+              <th>Account created on</th>
+              <th>Added by</th>
+              <th>ID Added by</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {client.map((e) => (
+              <tr>
+                <td>{e.user_id}</td>
+                <td>{e.fullname}</td>
+                <td>
+                  {new Date(e.date_of_birth).toLocaleDateString("en-US", {
+                    month: "2-digit",
+                    day: "2-digit",
+                    year: "numeric",
+                  })}
+                </td>
+                <td>{e.nationality}</td>
+                <td>
+                  {new Date(e.account_created_date).toLocaleDateString(
+                    "en-US",
+                    {
+                      month: "2-digit",
+                      day: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    }
+                  )}
+                </td>
+                <td>{e.added_by}</td>
+                <td>{e.added_by_id}</td>
+                <td>
+                  <Link
+                    to={`/dashboard/edit_employee/` + e.id}
+                    className="btn btn-info btn-sm me-2"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    className="btn btn-warning btn-sm"
+                    onClick={() => handleDelete(e.manager_id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default Client;
